@@ -1,0 +1,2 @@
+# Install torch/torchvision separately from the CPU index in docs/TRAINING.md.
+onnx==1.19.0

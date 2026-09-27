@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173e32">
+  <meta name="description" content="A thoughtful crop-health field guide. Scan a leaf, understand the possibilities, and keep track of your plants.">
+  <title>Leafwise — Plant scanner & field journal</title>
+  <meta name="apple-mobile-web-app-capable" content="yes"><link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml"><link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/install.css"><script src="/app.js" type="module"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+ <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 3C8 2 2 8 6 15s15 1 14-12Z"/><path d="M3 21 16 8M9 15v-5m0 5h5"/></symbol>
+ <symbol id="i-scan" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M7 12h10"/></symbol>
+ <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v16M3 3c4 0 7 0 9 2 2-2 5-2 9-2v16c-4 0-7 0-9 2-2-2-5-2-9-2Z"/></symbol>
+ <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+ <symbol id="i-camera" viewBox="0 0 24 24"><path d="m8 5 1-2h6l1 2h4v15H4V5Z"/><circle cx="12" cy="12" r="4"/></symbol>
+ <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol>
+ <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+ <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+ <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 8 3v6c0 6-8 11-8 11S4 17 4 11V5Z"/><path d="m8 11 3 3 5-6"/></symbol>
+ <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+ <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+</defs></svg>
+<header class="topbar">
+ <a href="#scan" class="brand" aria-label="Leafwise home"><span class="brand-mark"><svg><use href="#i-leaf"/></svg></span>leafwise<span class="brand-dot">.</span></a>
+ <nav aria-label="Main navigation">
+  <a href="#scan" class="nav-link active" data-view="scan"><svg><use href="#i-scan"/></svg><span data-i18n="scanNav">Leaf scan</span></a>
+  <a href="#journal" class="nav-link" data-view="journal"><svg><use href="#i-book"/></svg><span data-i18n="journalNav">My journal</span><span id="journal-count" class="count" hidden>0</span></a>
+  <a href="#guide" class="nav-link" data-view="guide"><svg><use href="#i-grid"/></svg><span data-i18n="guideNav">Field guide</span></a>
+ </nav>
+ <div class="header-tools"><label class="sr-only" for="language">Navigation language</label><select id="language" aria-label="Navigation language"><option value="en">English</option><option value="hi">हिन्दी</option><option value="gu">ગુજરાતી</option></select><button id="about-open" class="icon-button" aria-label="About Leafwise"><svg><use href="#i-info"/></svg></button></div>
+</header>
+<main id="main">
+ <section id="view-scan" class="view">
+  <div class="hero">
+   <div class="hero-copy"><span class="eyebrow"><span></span><span data-i18n="eyebrow">YOUR POCKET FIELD GUIDE</span></span><h1 data-i18n="hero">A closer look.<br>A clearer next step.</h1><p data-i18n="intro">Every leaf tells a story. Get a little help reading yours, with a photo and a few thoughtful next steps.</p><div class="hero-meta"><span><svg><use href="#i-shield"/></svg><span data-i18n="private">Local crop scanning</span></span><span class="meta-dot">·</span><span id="coverage">Checking model…</span></div></div>
+   <div class="hero-art"><img src="/botanical.svg" alt="Botanical illustration of a green leaf with visible veins"><span class="art-label">OBSERVE. UNDERSTAND. GROW.</span><span class="art-stamp">a little care<br><i>goes a long way.</i></span></div>
+  </div>
+  <div id="connection" class="notice" role="status" hidden></div>
+  <div class="workspace">
+   <section class="scan-card card" aria-labelledby="scan-title">
+    <div class="section-header"><div><span class="eyebrow small" data-i18n="start">START WITH WHAT YOU SEE</span><h2 id="scan-title" data-i18n="scanTitle">Let's look at your plant</h2></div><span class="step-tag">01 / 02</span></div>
+    <div class="segmented" role="group" aria-label="Choose scan mode"><button type="button" id="mode-identify" class="selected" aria-pressed="true" data-i18n="identify">Identify a plant</button><button type="button" id="mode-disease" aria-pressed="false" data-i18n="health">Check crop health</button></div>
+    <div id="health-fields" hidden>
+     <label for="health-engine" class="field-label">Health analysis</label><select id="health-engine"><option value="plantnet">Online · Pl@ntNet disease &amp; pest identification</option><option value="starter">Starter model · 3 crops only</option></select>
+     <div id="online-health-info"><p class="inset-note">Check affected leaves, fruit or bark for conditions covered by Pl@ntNet. Uses the website’s identification service. Coverage is limited; a missing match does not mean the plant is healthy.</p><button id="disease-coverage" class="text-button" type="button">View supported conditions ↗</button><p class="field-help">Add one clear close-up and a wider view of the affected plant. Keep all photos from the same individual.</p></div>
+     <div id="starter-fields" hidden>
+     <p class="inset-note" id="health-coverage">Disease screening only covers the installed model's crops. It cannot identify an unknown plant.</p>
+     <label for="crop" class="field-label" data-i18n="cropQuestion">Which crop is this?</label><select id="crop"><option value="auto">Choose a known crop</option></select>
+     <p class="field-help" id="crop-help">Not sure, or checking soybean or another plant? Identify the species first.</p><button id="identify-first" class="text-button" type="button">Identify this plant first ↗</button>
+     <label for="verification" class="field-label">Before checking health</label><select id="verification"><option value="online">Verify species with Pl@ntNet first</option><option value="local">Local only · I already know the crop</option></select>
+     <p id="verification-note" class="field-help"></p>
+     <div class="consent"><input id="crop-confirmed" type="checkbox"><label for="crop-confirmed">I confirm this is the selected crop. For bell pepper, I confirm it is a bell pepper plant.</label></div>
+     </div>
+    </div>
+    <div id="identify-fields"><p class="field-help">Start here for soybean, trees and other plants. Uses Pl@ntNet with your permission.</p><label for="identity-mode" class="field-label">What would you like to identify?</label><select id="identity-mode"><option value="species">Plant species</option><option value="variety">Variety / cultivar · limited coverage</option></select></div>
+    <div id="provider-panel" class="provider-panel"><p id="provider-state" class="field-help" role="status">Checking configuration…</p><div class="button-row"><button id="check-provider" class="button secondary" type="button">Check connection</button><button id="provider-help" class="text-button" type="button">API setup help</button></div><p class="field-help">Connection check sends no photos.</p></div>
+    <div class="field-row"><label class="field-label" data-i18n="addPhotos">Add your photos</label><span id="photo-count">0 / 3</span></div>
+    <div id="dropzone" class="dropzone"><span class="upload-icon"><svg><use href="#i-leaf"/></svg></span><h3 data-i18n="uploadTitle">One leaf. A little daylight.</h3><p data-i18n="uploadHint">Drop a photo here, or choose from your device.</p><div class="button-row"><button id="choose-files" class="button secondary" type="button"><svg><use href="#i-upload"/></svg><span data-i18n="choose">Choose photos</span></button><button id="open-camera" class="button quiet" type="button"><svg><use href="#i-camera"/></svg><span data-i18n="camera">Use camera</span></button></div><small>JPG, PNG or WebP · up to 6 MB each · resized for upload</small></div>
+    <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden><input id="camera-file" type="file" accept="image/*" capture="environment" hidden>
+    <div id="photo-grid" class="photo-grid"></div><button id="add-more" class="text-button" type="button" hidden data-i18n="addMore">+ Add another view</button>
+    <div id="consent-wrap" class="consent"><input id="consent" type="checkbox"><label for="consent">Send these photos, without embedded location metadata, to Pl@ntNet for identification. Internet access and the owner's API quota are used.</label></div>
+    <p id="scan-error" class="error" role="alert" hidden></p>
+    <button id="analyze" type="button" class="button primary full" disabled><svg><use href="#i-scan"/></svg><span data-i18n="identify">Identify a plant</span><svg class="end-icon"><use href="#i-arrow"/></svg></button>
+    <div id="busy" class="busy" role="status" hidden><span class="spinner"></span><span data-i18n="working">Looking at your photos…</span><button type="button" id="cancel" class="text-button">Cancel</button></div>
+    <p class="privacy-line"><svg><use href="#i-shield"/></svg><span id="privacy-copy">Crop scans run on this app’s server. Photos aren’t stored. Save results only when you choose.</span></p>
+   </section>
+   <aside class="right-column">
+    <div class="tip-card"><span class="eyebrow small">A BETTER PHOTO, A BETTER START</span><h2 data-i18n="photoTipTitle">Make the leaf <br>the main character.</h2><ol class="photo-tips"><li><span>1</span><div><strong data-i18n="tip1">Find soft daylight</strong><p>Avoid direct glare, deep shade and flash.</p></div></li><li><span>2</span><div><strong data-i18n="tip2">Fill the frame</strong><p>Keep one leaf centred, with edges and spots in focus.</p></div></li><li><span>3</span><div><strong data-i18n="tip3">Show another side</strong><p>For crop health, add leaf views. For identity, try a flower, fruit or bark.</p></div></li></ol><div class="tip-footer"><svg><use href="#i-leaf"/></svg><span>Keep all photos from the same plant.</span></div></div>
+    <div class="honest-note"><span class="tiny-label">GOOD TO KNOW</span><p>A useful clue, not a final diagnosis. Weather, roots and soil can tell the rest of the story.</p><button id="limitations-open" type="button" class="text-button">What can Leafwise recognise? ↗</button></div>
+   </aside>
+  </div>
+  <section id="result" class="result card" aria-live="polite" aria-labelledby="result-title" tabindex="-1" hidden></section>
+  <div class="bottom-note"><span>BUILT FOR THE CURIOUS GROWER</span><p>Notice small changes. Keep good records. Ask for help early.</p></div>
+ </section>
+ <section id="view-journal" class="view" hidden><div class="page-heading"><div><span class="eyebrow">YOUR GROWING NOTES</span><h1 data-i18n="journalTitle">A record of small changes.</h1><p>Saved on this browser. Add notes, revisit a scan, or take a report to your crop adviser.</p></div><button id="export-journal" class="button secondary">Export journal</button></div><div id="journal-list" class="journal-list"></div></section>
+ <section id="view-guide" class="view" hidden><div class="page-heading"><div><span class="eyebrow">OBSERVATION BEFORE ACTION</span><h1 data-i18n="guideTitle">Get to know your leaves.</h1><p>Explore the installed model's classes and practical first steps. Guides are in English.</p></div></div><div class="guide-toolbar"><label class="sr-only" for="guide-search">Search field guide</label><input id="guide-search" type="search" placeholder="Search crop or condition…"><label class="sr-only" for="guide-crop">Filter crop</label><select id="guide-crop"><option value="all">All crops</option></select></div><div id="guide-list" class="guide-grid"></div></section>
+</main>
+<footer><a href="#scan" class="footer-brand">leafwise.</a><span>Observe with care.</span><a href="/" class="text-button">Website</a><button id="install" class="text-button" data-install>Install app</button><button id="footer-about" class="text-button">About & privacy</button></footer>
+<p class="install-app-status" data-install-status role="status"></p>
+<dialog id="camera-dialog"><div class="dialog-header"><h2>Frame your leaf</h2><button id="close-camera" class="icon-button" aria-label="Close camera"><svg><use href="#i-close"/></svg></button></div><video id="camera-video" autoplay playsinline muted></video><p>Use daylight and keep the leaf centred.</p><button id="capture" class="button primary full">Take photo</button></dialog>
+<dialog id="detail-dialog"><div class="dialog-header"><span class="eyebrow">LEAFWISE FIELD NOTES</span><button id="close-detail" class="icon-button" aria-label="Close details"><svg><use href="#i-close"/></svg></button></div><div id="detail-content"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>

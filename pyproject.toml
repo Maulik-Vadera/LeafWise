@@ -1,0 +1,7 @@
+# Runtime dependencies are pinned in requirements.txt; Python is pinned in .python-version.
+[tool.vercel]
+entrypoint = "app.main:app"
+
+# Keep security middleware on every response, including HTML and static assets.
+[tool.vercel.fastapi.static]
+cdn = false

@@ -1,0 +1,74 @@
+/* Routing regression: simulated provider responses, never a live key or API call. */
+const {chromium}=require('playwright');
+const {spawn}=require('node:child_process');
+const path=require('node:path');
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+const output=process.env.QA_OUTPUT||path.join(root,'test-results');
+fs.mkdirSync(output,{recursive:true});
+const port=18124;
+const server=spawn(process.env.QA_PYTHON||'python',['-m','uvicorn','app.main:app','--host','127.0.0.1','--port',String(port),'--no-access-log'],{cwd:root,env:{...process.env,PLANTNET_API_KEY:'browser-test-not-a-real-key'},stdio:['ignore','pipe','pipe']});
+let browser;
+async function ready(){for(let i=0;i<60;i++){try{if((await fetch(`http://127.0.0.1:${port}/api/status`)).ok)return;}catch{}await new Promise(r=>setTimeout(r,200));}throw new Error('Server did not start');}
+(async()=>{
+ try{
+  await ready();
+  const options={headless:true};
+  if(process.env.QA_CHROMIUM)options.executablePath=process.env.QA_CHROMIUM;
+  if(process.env.QA_CHROMIUM_ARGS)options.args=JSON.parse(process.env.QA_CHROMIUM_ARGS);
+  browser=await chromium.launch(options);
+  const page=await browser.newPage({viewport:{width:1440,height:1120},serviceWorkers:'block'});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  let diseaseRequests=0,identityRequests=0;
+  page.on('request',r=>{if(new URL(r.url()).pathname==='/api/analyze')diseaseRequests++;});
+  let connectionFails=true;
+  await page.route('**/api/plantnet/check',r=>r.fulfill({status:connectionFails?502:200,contentType:'application/json',body:JSON.stringify(connectionFails?{code:'unauthorized',detail:'Pl@ntNet rejected this key or its permissions.'}:{state:'ready',message:'Key accepted by Pl@ntNet. 10 species requests remaining today.',remaining:10})}));
+  let identityFails=false;
+  await page.route('**/api/identify',r=>{
+   identityRequests++;
+   assert.match(r.request().postData(),/name="consent"\r\n\r\nyes/);
+   return r.fulfill({status:identityFails?502:200,contentType:'application/json',body:JSON.stringify(identityFails?{code:'unauthorized',detail:'Pl@ntNet rejected this key or its permissions.'}:{id:'mock-soybean-observation',created_at:new Date().toISOString(),provider:'Pl@ntNet',mode:'species',status:'candidates',note:'Species candidates need confirmation.',candidates:[{name:'Glycine max',scientific_name:'Glycine max',common_names:['Soybean'],genus:'Glycine',family:'Fabaceae',score:.97}],health_scope:{status:'unsupported',crop_id:null,message:'Disease screening is not available for Glycine max. The installed disease model will not be used for this species.'}})});
+  });
+  await page.goto(`http://127.0.0.1:${port}/app`);
+  await page.waitForFunction(()=>document.getElementById('coverage').textContent.includes('v1.3.0'));
+  assert.equal(await page.locator('#mode-identify').getAttribute('aria-pressed'),'true');
+  assert.match(await page.locator('#provider-state').innerText(),/not been checked/);
+  await page.locator('#check-provider').click();
+  await page.waitForFunction(()=>document.getElementById('provider-state').textContent.includes('rejected'));
+  connectionFails=false;await page.locator('#check-provider').click();
+  await page.waitForFunction(()=>document.getElementById('provider-state').textContent.includes('Key accepted'));
+  const photo=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=256;const ctx=c.getContext('2d');ctx.fillStyle='#427a34';ctx.fillRect(0,0,256,256);return c.toDataURL('image/png').split(',')[1];});
+  await page.locator('#photos').setInputFiles({name:'test-photo.png',mimeType:'image/png',buffer:Buffer.from(photo,'base64')});
+  assert.equal(await page.locator('#analyze').isDisabled(),true);
+  await page.locator('#consent').check();await page.locator('#analyze').click();
+  await page.locator('#result').waitFor({state:'visible'});
+  assert.match(await page.locator('#result-title').innerText(),/Possible species: Soybean/);
+  assert.match(await page.locator('#result').innerText(),/Disease screening is not available/);
+  assert.doesNotMatch(await page.locator('#result').innerText(),/Potato|Tomato/);
+  assert.equal(diseaseRequests,0);assert.equal(identityRequests,1);
+  await page.locator('#scan-note').fill('Soybean observation');await page.locator('#save-result').click();
+  await page.waitForFunction(()=>document.getElementById('journal-count').textContent==='1');
+  await page.screenshot({path:path.join(output,'identity-desktop.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});
+  await page.screenshot({path:path.join(output,'identity-mobile.png'),fullPage:true});
+  const overflow=await page.evaluate(()=>[...document.querySelectorAll('body *')].filter(e=>{const r=e.getBoundingClientRect();return r.width&&r.right>innerWidth+1;}).map(e=>({tag:e.tagName,id:e.id,cls:e.className,right:e.getBoundingClientRect().right,width:e.getBoundingClientRect().width})));
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,JSON.stringify(overflow));
+  identityFails=true;await page.locator('#analyze').click();
+  await page.locator('#scan-error').waitFor({state:'visible'});
+  assert.match(await page.locator('#scan-error').innerText(),/rejected/);assert.equal(diseaseRequests,0);
+  assert.equal(await page.locator('#result').isHidden(),true);
+  await page.locator('#mode-disease').click();await page.locator('#health-engine').selectOption('starter');
+  assert.equal(await page.locator('#verification').inputValue(),'online');
+  assert.equal(await page.locator('#analyze').isDisabled(),true);
+  await page.locator('#crop').selectOption('Potato');await page.locator('#crop-confirmed').check();
+  assert.equal(await page.locator('#analyze').isEnabled(),true);
+  await page.locator('#crop').selectOption('other');assert.equal(await page.locator('#analyze').isDisabled(),true);
+  await page.locator('#identify-first').click();assert.equal(await page.locator('#mode-identify').getAttribute('aria-pressed'),'true');
+  await page.reload();assert.equal(await page.locator('#mode-identify').getAttribute('aria-pressed'),'true');
+  await page.locator('[data-view="journal"]').click();await page.locator('.journal-card').waitFor();
+  assert.match(await page.locator('.journal-card').innerText(),/Soybean/);
+  assert.deepEqual(errors,[]);
+  console.log('PASS: default species flow; key rejection/check; photo consent; soybean response; unsupported health; no local fallback; journal; mobile layout. Simulated provider only.');
+ }finally{if(browser)await browser.close();server.kill();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

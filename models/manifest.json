@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "MobileNetV3 \u00b7 PlantVillage starter",
+  "revision": "d76fe187be1c4c3a5474f835a7a70cd08c7ab085",
+  "source": "https://huggingface.co/imaflower/plantvillage-mobilenetv3",
+  "license": "MIT (repository metadata)",
+  "labels": [
+    "Pepper,_bell___Bacterial_spot",
+    "Pepper,_bell___healthy",
+    "Potato___Early_blight",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Tomato___Bacterial_spot",
+    "Tomato___Early_blight",
+    "Tomato___Late_blight",
+    "Tomato___Leaf_Mold",
+    "Tomato___Septoria_leaf_spot",
+    "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "Tomato___Tomato_mosaic_virus",
+    "Tomato___healthy"
+  ],
+  "preprocess": {
+    "size": 224,
+    "resize_short": 256,
+    "mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "std": [
+      0.229,
+      0.224,
+      0.225
+    ]
+  },
+  "temperature": 1.0,
+  "decision": {
+    "threshold": 0.85,
+    "margin": 0.25,
+    "calibrated": false
+  },
+  "sha256": {
+    "model.onnx": "c6a962f699ddc820108231b23454b6a4e242407044c2c2514a0f6294d35428fc",
+    "model.onnx.data": "c03d114add89db13d850e5bbe0a7c09040cf6caf1acfbbd489c21234fa6dcb5e"
+  },
+  "field_validated": false,
+  "notes": "Input size follows training_config.json and ONNX shape; resize-short-256 plus center-crop follows published example. Upstream accuracy claims were not independently reproduced."
+}

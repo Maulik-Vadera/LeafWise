@@ -1,0 +1,14 @@
+.venv/
+.env
+.env.*
+!.env.example
+.vercel/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/
+runs/
+.DS_Store
+node_modules/
+playwright-report/
+test-results/
