@@ -4,6 +4,7 @@
   "functions": {
     "app/main.py": {
       "maxDuration": 60,
+      "includeFiles": "models/**",
       "excludeFiles": "{.venv/**,.env,.env.*,tests/**,test-results/**,training/**,docs/**,data/**,runs/**,**/__pycache__/**,**/*.pyc,**/*.zip}"
     }
   }
